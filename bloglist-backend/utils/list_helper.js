@@ -25,17 +25,29 @@ const favoriteBlog = (blogs) => {
 };
 
 const mostBlogs = (blogs) => {
+  console.log('mostBlogs called with:', blogs); // Log input
+  if (blogs.length === 0) {
+    console.log('No blogs provided'); // Log empty case
+    return null;
+  }
+
   const grouped = _.countBy(blogs, 'author');
+  console.log('Grouped by author:', grouped); // Log grouped authors
 
-  const topAuthor = _.maxBy(
-    Object.entries(grouped),
-    ([author, count]) => count
-  );
+  const topAuthor = _.maxBy(Object.entries(grouped), ([, count]) => count);
+  console.log('Top author:', topAuthor); // Log top author
 
-  return {
+  if (!topAuthor) {
+    console.log('No top author found'); // Log missing top author
+    return null;
+  }
+
+  const result = {
     author: topAuthor[0],
     blogs: topAuthor[1],
   };
+  console.log('Result:', result); // Log result
+  return result;
 };
 
 const mostLikedBlog = (blogs) => {
