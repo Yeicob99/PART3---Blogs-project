@@ -1,7 +1,16 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Blog = require('../models/blog');
-const User = require('../models/user'); // Import User model
+const User = require('../models/user'); // Import User 
+const jwt = require('jsonwebtoken'); // Import jwt for token verification
+
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.replace('Bearer ', '')
+}
+  return null
+}
 
 const blogsRouter = express.Router(); // Initialize blogsRouter
 
@@ -41,7 +50,13 @@ blogsRouter.post('/', async (request, response) => {
     return response.status(400).json({ error: 'Title, URL, and author are required' });
   }
 
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'Token missing or invalid' });
+  }
+
   const user = await User.findById(author);
+  
   if (!user) {
     return response.status(400).json({ error: 'Invalid author ID' });
   }

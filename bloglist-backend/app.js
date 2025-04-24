@@ -5,7 +5,7 @@ const blogsRouter = require('./controllers/blogs'); // Ensure correct import
 const config = require('./utils/config');
 const logger = require('./utils/logger');
 const usersRouter = require('./controllers/users'); // Ensure correct import
-
+const loginRouter = require('./controllers/login'); // Importa el controlador de login
 
 const app = express();
 
@@ -25,5 +25,6 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/blogs', blogsRouter); // Ensure route is set up correctly
 app.use('/api/users', usersRouter); // Ensure route is set up correctly
+app.use('/api/login', loginRouter); // Registra la ruta de login
 
 module.exports = app; // Ensure this line is present
