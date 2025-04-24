@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const blogsRouter = require('./controllers/blogs'); // Ensure correct import
 const config = require('./utils/config');
 const logger = require('./utils/logger');
+const usersRouter = require('./controllers/users'); // Ensure correct import
+
 
 const app = express();
 
@@ -22,5 +24,6 @@ mongoose.connect(config.MONGODB_URI)
 app.use(cors());
 app.use(express.json());
 app.use('/api/blogs', blogsRouter); // Ensure route is set up correctly
+app.use('/api/users', usersRouter); // Ensure route is set up correctly
 
 module.exports = app; // Ensure this line is present

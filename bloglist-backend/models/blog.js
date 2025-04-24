@@ -5,7 +5,11 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: true, // Ensure title is required
   },
-  author: String,
+  author: { 
+    type: mongoose.Schema.Types.ObjectId, // Use ObjectId for author reference
+    ref: 'User', // Reference to the User model
+    required: true, // Ensure author is required
+  },
   url: {
     type: String,
     required: true, // Ensure URL is required
