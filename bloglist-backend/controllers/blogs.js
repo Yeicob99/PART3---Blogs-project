@@ -44,37 +44,38 @@ blogsRouter.put('/:id', async (request, response) => {
 });
 
 blogsRouter.post('/', async (request, response) => {
-  const { title, author, url, likes } = request.body;
+  const { title, url, likes } = request.body;
 
-  if (!title || !url || !author) {
-    return response.status(400).json({ error: 'Title, URL, and author are required' });
-  }
-
+  // Verifica el token y obtiene el usuario autenticado
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'Token missing or invalid' });
   }
 
-  const user = await User.findById(author);
-  
+  const user = await User.findById(decodedToken.id); // Obtén el usuario autenticado
   if (!user) {
-    return response.status(400).json({ error: 'Invalid author ID' });
+    return response.status(401).json({ error: 'User not found' });
+  }
+
+  if (!title || !url) {
+    return response.status(400).json({ error: 'Title and URL are required' });
   }
 
   const blog = new Blog({
     title,
-    author: user._id, // Associate blog with the user
+    author: user._id, // Asocia el blog al usuario autenticado
     url,
     likes: likes || 0, // Default likes to 0 if not provided
   });
 
   try {
     const savedBlog = await blog.save();
-    user.blogs = user.blogs.concat(savedBlog._id); // Add blog to user's blogs
+    user.blogs = user.blogs.concat(savedBlog._id); // Agrega el blog al usuario
     await user.save();
 
     response.status(201).json(savedBlog);
   } catch (error) {
+    console.error('Error in POST /api/blogs:', error); // Log para depuración
     response.status(500).json({ error: 'An error occurred while saving the blog' });
   }
 });
