@@ -6,6 +6,34 @@ const app = require('../app');
 const api = supertest(app);
 const helper = require('../utils/test_helper');
 const Blog = require('../models/blog');
+const User = require('../models/user'); // Importa el modelo User
+
+let token = '';
+
+beforeEach(async () => {
+  await Blog.deleteMany({});
+  await User.deleteMany({});
+
+  const newUser = {
+    username: 'tester',
+    name: 'Test User',
+    password: 'password123',
+  };
+
+  await api.post('/api/users').send(newUser);
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: newUser.username, password: newUser.password });
+
+  token = loginResponse.body.token;
+
+  const userId = loginResponse.body.id; // Obtén el ID del usuario autenticado
+
+  const blogObjects = helper.initialBlogs.map(blog => new Blog({ ...blog, author: userId })); // Asigna el autor
+  const promiseArray = blogObjects.map(blog => blog.save());
+  await Promise.all(promiseArray);
+});
 
 const blogs = [
   {
@@ -148,6 +176,7 @@ test('a new blog is added', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/);
@@ -214,4 +243,17 @@ test('update the likes of a blog', async () => {
     .expect('Content-Type', /application\/json/);
 
   assert.strictEqual(response.body.likes, updatedLikes.likes);
+});
+
+test('a blog cannot be added without a token', async () => {
+  const newBlog = {
+    title: 'Blog sin token',
+    url: 'http://example.com/',
+    likes: 2,
+  };
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(401); // Unauthorized
 });

@@ -8,7 +8,7 @@ const blogSchema = new mongoose.Schema({
   author: { 
     type: mongoose.Schema.Types.ObjectId, // Use ObjectId for author reference
     ref: 'User', // Reference to the User model
-    required: true,
+    required: true, // Ensure author is required
   },
   url: {
     type: String,
@@ -23,9 +23,8 @@ const blogSchema = new mongoose.Schema({
 blogSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
-    // Ensure _id is retained for testing purposes
     delete returnedObject.__v;
   },
 });
 
-module.exports = mongoose.model('Blog', blogSchema); // Ensure correct model name
+module.exports = mongoose.model('Blog', blogSchema);

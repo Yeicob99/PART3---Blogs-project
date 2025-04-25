@@ -45,19 +45,7 @@ blogsRouter.put('/:id', async (request, response) => {
 
 blogsRouter.post('/', async (request, response) => {
   const { title, url, likes } = request.body;
-
-  // Verifica el token usando request.token
-  const decodedToken = jwt.verify(request.token, process.env.SECRET);
-  console.log('Extracted token:', request.token);
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'Token missing or invalid' });
-  }
-
-
-  const user = await User.findById(decodedToken.id); // Obtén el usuario autenticado
-  if (!user) {
-    return response.status(401).json({ error: 'User not found' });
-  }
+  const user = request.user; // Obtén el usuario desde el middleware
 
   if (!title || !url) {
     return response.status(400).json({ error: 'Title and URL are required' });
@@ -92,11 +80,8 @@ blogsRouter.get('/', async (request, response) => {
 });
 
 blogsRouter.delete('/:id', async (request, response) => {
+  const user = request.user; // Obtén el usuario desde el middleware
   console.log('Request ID:', request.params.id); // Log del ID recibido
-  const decodedToken = jwt.verify(request.token, process.env.SECRET);
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'Token missing or invalid' });
-  }
 
   try {
     const blog = await Blog.findById(request.params.id);
@@ -107,7 +92,7 @@ blogsRouter.delete('/:id', async (request, response) => {
     }
 
     // Verifica si el usuario autenticado es el creador del blog
-    if (blog.author.toString() !== decodedToken.id.toString()) {
+    if (blog.author.toString() !== user._id.toString()) {
       return response.status(403).json({ error: 'Unauthorized to delete this blog' });
     }
 

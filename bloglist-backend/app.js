@@ -24,8 +24,8 @@ mongoose.connect(config.MONGODB_URI)
 
 app.use(cors());
 app.use(express.json());
-app.use(middleware.tokenExtractor); // Registra el middleware antes de las rutas
-app.use('/api/blogs', blogsRouter); // Ensure route is set up correctly
+app.use(middleware.tokenExtractor); // Registra el tokenExtractor para todas las rutas
+app.use('/api/blogs', middleware.userExtractor, blogsRouter); // Aplica userExtractor solo a /api/blogs
 app.use('/api/users', usersRouter); // Ensure route is set up correctly
 app.use('/api/login', loginRouter); // Registra la ruta de login
 
