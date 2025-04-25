@@ -3,20 +3,20 @@ const mongoose = require('mongoose');
 const blogSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true, // Ensure title is required
+    required: true,
   },
   author: { 
     type: mongoose.Schema.Types.ObjectId, // Use ObjectId for author reference
     ref: 'User', // Reference to the User model
-    required: true, // Ensure author is required
+    required: true,
   },
   url: {
     type: String,
-    required: true, // Ensure URL is required
+    required: true,
   },
   likes: {
     type: Number,
-    default: 0, // Default likes to 0
+    default: 0,
   },
 });
 

@@ -6,6 +6,7 @@ const config = require('./utils/config');
 const logger = require('./utils/logger');
 const usersRouter = require('./controllers/users'); // Ensure correct import
 const loginRouter = require('./controllers/login'); // Importa el controlador de login
+const middleware = require('./utils/middleware'); // Importa el middleware
 
 const app = express();
 
@@ -23,6 +24,7 @@ mongoose.connect(config.MONGODB_URI)
 
 app.use(cors());
 app.use(express.json());
+app.use(middleware.tokenExtractor); // Registra el middleware antes de las rutas
 app.use('/api/blogs', blogsRouter); // Ensure route is set up correctly
 app.use('/api/users', usersRouter); // Ensure route is set up correctly
 app.use('/api/login', loginRouter); // Registra la ruta de login

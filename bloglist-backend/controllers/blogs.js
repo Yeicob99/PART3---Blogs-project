@@ -46,11 +46,13 @@ blogsRouter.put('/:id', async (request, response) => {
 blogsRouter.post('/', async (request, response) => {
   const { title, url, likes } = request.body;
 
-  // Verifica el token y obtiene el usuario autenticado
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  // Verifica el token usando request.token
+  const decodedToken = jwt.verify(request.token, process.env.SECRET);
+  console.log('Extracted token:', request.token);
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'Token missing or invalid' });
   }
+
 
   const user = await User.findById(decodedToken.id); // Obtén el usuario autenticado
   if (!user) {
@@ -86,6 +88,35 @@ blogsRouter.get('/', async (request, response) => {
     response.json(blogs.map(blog => blog.toJSON())); // Ensure _id is included
   } catch (error) {
     response.status(500).json({ error: 'An error occurred while fetching blogs' });
+  }
+});
+
+blogsRouter.delete('/:id', async (request, response) => {
+  console.log('Request ID:', request.params.id); // Log del ID recibido
+  const decodedToken = jwt.verify(request.token, process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'Token missing or invalid' });
+  }
+
+  try {
+    const blog = await Blog.findById(request.params.id);
+    console.log('Blog found:', blog); // Log del blog encontrado
+
+    if (!blog) {
+      return response.status(404).json({ error: 'Blog not found' });
+    }
+
+    // Verifica si el usuario autenticado es el creador del blog
+    if (blog.author.toString() !== decodedToken.id.toString()) {
+      return response.status(403).json({ error: 'Unauthorized to delete this blog' });
+    }
+
+    await Blog.findByIdAndDelete(request.params.id);
+    console.log('Blog deleted successfully'); // Log de éxito
+    response.status(204).end();
+  } catch (error) {
+    console.error('Error in DELETE /api/blogs/:id:', error); // Log del error
+    response.status(500).json({ error: 'An error occurred while deleting the blog' });
   }
 });
 
